@@ -12,11 +12,11 @@
         android:text="Start Ads"
         android:onClick="startAds" />
 
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="209dp"
-        android:layout_height="wrap_content"
-        android:onClick="startProxy"
-        android:text="Start proxy" />
+     <Button 
+         android:id="@+id/button2" 
+         android:layout_width="209dp" 
+         android:layout_height="wrap_content" 
+         android:onClick="startProxy" 
+         android:text="Start Proxy" /> 
     
 </LinearLayout>
