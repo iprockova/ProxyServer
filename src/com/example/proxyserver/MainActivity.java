@@ -46,10 +46,11 @@ public class MainActivity extends Activity {
 	 Socket socket = null;
 	 DataInputStream dataInputStream = null;
 	 BufferedReader in = null;
-	 
+	
+	// AdMob 
 	private AdView adView;
 	private AdRequest adRequest;
-	LinearLayout layout;
+	private LinearLayout layout;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +58,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		
 	}
-	public void startAds(View view){
-		Log.d("myApp", "start ads");
+	public void fetchAds(View view){
 		adView = new AdView(this, AdSize.BANNER, "a15122003cf3080");
 		
 		layout = (LinearLayout)findViewById(R.id.linearLayout);
@@ -68,9 +68,9 @@ public class MainActivity extends Activity {
         adRequest.addTestDevice(AdRequest.TEST_EMULATOR);              
         adRequest.addTestDevice("8C9CFB4E6D4629F186568482BC555C1C"); 
         adView.setGravity(Gravity.BOTTOM);
+        
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.FILL_PARENT);
         adView.setLayoutParams(layoutParams);
-    	//adView.loadAd(adRequest);
         
       	new Thread(new Runnable() {
 	        public void run() {
@@ -94,149 +94,34 @@ public class MainActivity extends Activity {
 	public void listen(){
 		try {
 			   serverSocket = new ServerSocket(8888);
-			   
 			   Log.d("myApp", "Listening :8888");
-			   
-			  } catch (IOException e) {
-			   // TODO Auto-generated catch block
-			   e.printStackTrace();
-			  }
-		  while(true){
-			  Log.d("myApp", "while");
+			   String inputLine;
 			  
-			   try {
-				socket = serverSocket.accept();
-				Log.d("myApp", "socket accepted");
-			    //dataInputStream = new DataInputStream(socket.getInputStream());
-			   // dataOutputStream = new DataOutputStream(socket.getOutputStream());
-			    in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			    String inputLine;
-			    //CharSequence[] item = {"m","e", "d", "i", "a", ".", "a", "d", "m", "o", "b"};
-			    while (!(inputLine = in.readLine()).equals("")){
-			        System.out.println(inputLine);
-			        if(inputLine.contains("media.admob")){
-			        	//String response = relayRequest();
-			        	//System.out.println("response: " + response);
-			        	urlconnection();
-			        	break;
-			        }
-			    }
-			    
-			    
-			    
-			    //System.out.println("ip: " + socket.getInetAddress());
-			   // System.out.println("message: " + dataInputStream.readUTF());
-			    //dataOutputStream.writeUTF("Hello!");
-			   } catch (IOException e) {
-			    // TODO Auto-generated catch block
-			    e.printStackTrace();
+		  while(true){
+			  socket = serverSocket.accept();
+			  Log.d("myApp", "socket accepted");
+			  //dataInputStream = new DataInputStream(socket.getInputStream());
+			  //dataOutputStream = new DataOutputStream(socket.getOutputStream());
+			  in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			  
+			  while (!(inputLine = in.readLine()).equals(""))
+			      System.out.println(inputLine);
 			   }
-			   finally{
-			    if( socket!= null){
-			     try {
+		}catch (IOException e) {
+			e.printStackTrace();
+		}
+		finally{
+			try {
+				if(socket!= null)
 			      socket.close();
-			     } catch (IOException e) {
-			      // TODO Auto-generated catch block
-			      e.printStackTrace();
-			     }
-			    }
-			    if (in != null) {
-			    	try {
-						in.close();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			    }
-			    if( dataInputStream!= null){
-			     try {
+			    if (in!= null) 
+			    	in.close();
+			    if(dataInputStream!= null)
 			      dataInputStream.close();
-			     } catch (IOException e) {
-			      // TODO Auto-generated catch block
+			}catch (IOException e) {
 			      e.printStackTrace();
 			     }
-			    }
-			   }
-		  }
-	}
-	private void urlconnection(){
-		HttpURLConnection urlConnection = null;
-		   try {
-			   URL url = new URL("http://www.android.com/");
-			   urlConnection = (HttpURLConnection) url.openConnection();
-		     InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-		     String result = readInputStreamAsString(in);
-		     System.out.println("Result:" + result);
-		   }  
-		   catch(Exception e){
-			   e.printStackTrace();
-		   }
-		    finally {
-		     urlConnection.disconnect();
-		   }
-		 
-	}
-	public static String readInputStreamAsString(InputStream in) 
-		    throws IOException {
-
-		    BufferedInputStream bis = new BufferedInputStream(in);
-		    ByteArrayOutputStream buf = new ByteArrayOutputStream();
-		    int result = bis.read();
-		    while(result != -1) {
-		      byte b = (byte)result;
-		      buf.write(b);
-		      result = bis.read();
-		    }        
-		    return buf.toString();
 		}
-	private String relayRequest() {
-		HttpClient client = new DefaultHttpClient();
-		URI website;
-		HttpResponse response = null;
-		try {
-			website = new URI("http://www.google.com");
-			HttpGet request = new HttpGet(website);
-			response = client.execute(request);
-			Log.v("response code", response.getStatusLine()
-                    .getStatusCode() + ""); 
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		String html = "";
-		InputStream in = null;
-		try {
-			in = response.getEntity().getContent();
-		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		StringBuilder str = new StringBuilder();
-		String line = null;
-		try {
-			while((line = reader.readLine()) != null)
-			{
-			    str.append(line);
-			}
-			in.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		html = str.toString();
-		return html;
-		
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

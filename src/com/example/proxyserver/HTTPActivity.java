@@ -1,10 +1,14 @@
 package com.example.proxyserver;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.http.HttpResponse;
@@ -85,6 +89,36 @@ public class HTTPActivity extends Activity {
 		return html;
 		
 	}
+	private void urlconnection(){
+		HttpURLConnection urlConnection = null;
+		   try {
+			   URL url = new URL("http://www.android.com/");
+			   urlConnection = (HttpURLConnection) url.openConnection();
+		     InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+		     String result = readInputStreamAsString(in);
+		     System.out.println("Result:" + result);
+		   }  
+		   catch(Exception e){
+			   e.printStackTrace();
+		   }
+		    finally {
+		     urlConnection.disconnect();
+		   }
+		 
+	}
+	public static String readInputStreamAsString(InputStream in) 
+		    throws IOException {
+
+		    BufferedInputStream bis = new BufferedInputStream(in);
+		    ByteArrayOutputStream buf = new ByteArrayOutputStream();
+		    int result = bis.read();
+		    while(result != -1) {
+		      byte b = (byte)result;
+		      buf.write(b);
+		      result = bis.read();
+		    }        
+		    return buf.toString();
+		}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
