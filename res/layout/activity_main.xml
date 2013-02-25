@@ -1,22 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/linearLayout"
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent">
+    android:id="@+id/linearLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
 
     <Button
         android:id="@+id/button1"
-        android:layout_width="212dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start Ads"
-        android:onClick="startAds" />
+        android:onClick="fetchAds"
+        android:text="Start Ads" />
 
-     <Button 
-         android:id="@+id/button2" 
-         android:layout_width="209dp" 
-         android:layout_height="wrap_content" 
-         android:onClick="startProxy" 
-         android:text="Start Proxy" /> 
-    
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="stopAds"
+        android:text="Stop Ads" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="startProxy"
+        android:text="Start Proxy" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="enableProxy"
+        android:text="Enable Proxy" />
+
+    <Button
+        android:id="@+id/button5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="disableProxy"
+        android:text="Disable Proxy" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
 </LinearLayout>

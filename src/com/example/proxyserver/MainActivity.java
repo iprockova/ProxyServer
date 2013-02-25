@@ -10,6 +10,8 @@ import java.net.URL;
 
 import android.os.Bundle;
 import android.os.Looper;
+import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
@@ -39,18 +41,31 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 
 import com.google.ads.*;
+import com.google.ads.AdRequest.ErrorCode;
 
-public class MainActivity extends Activity {
 
-	 ServerSocket serverSocket = null;
-	 Socket socket = null;
-	 DataInputStream dataInputStream = null;
-	 BufferedReader in = null;
+public class MainActivity extends Activity implements AdListener{
+
 	
 	// AdMob 
 	private AdView adView;
 	private AdRequest adRequest;
+	
+	//ServerSocket
+	private ServerSocket serverSocket = null;
+	private Socket socket = null;
+	private DataInputStream dataInputStream = null;
+	private BufferedReader in = null;
+	
 	private LinearLayout layout;
+	
+	private TextView tvReceived = null;
+	private TextView tvFailed = null;
+	
+	private int counterReceivedAds = 0;
+	private int counterFailedAds = 0;
+	
+	public static final String HTTP_PROXY = "http_proxy";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,26 +80,28 @@ public class MainActivity extends Activity {
         layout.addView(adView);
         
         adRequest = new AdRequest();
-        adRequest.addTestDevice(AdRequest.TEST_EMULATOR);              
-        adRequest.addTestDevice("8C9CFB4E6D4629F186568482BC555C1C"); 
+       // adRequest.addTestDevice(AdRequest.TEST_EMULATOR);              
+       // adRequest.addTestDevice("8C9CFB4E6D4629F186568482BC555C1C"); 
         adView.setGravity(Gravity.BOTTOM);
         
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.FILL_PARENT);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
         adView.setLayoutParams(layoutParams);
+        adView.setAdListener(this);
+        adView.loadAd(adRequest);
         
-      	new Thread(new Runnable() {
-	        public void run() {
-	        	Looper.prepare();
-	        	
-	        	adView.loadAd(adRequest);
-	        }
-	    }).start();
-		
-		Log.d("myApp", "ads started");
+	}
+	public void stopAds(View view){
+		if (adView != null) {
+			adView.removeAllViews();
+	        adView.destroy();
+	      }
+		tvReceived = (TextView) findViewById(R.id.textView1);
+        tvReceived.setText("Received ads: " + counterReceivedAds);
+        
+        tvFailed = (TextView) findViewById(R.id.textView2);
+        tvFailed.setText("Failed ads: " + counterFailedAds);
 	}
 	public void startProxy(View view) {
-		Log.d("myApp", "start proxy");
-		
 		new Thread(new Runnable() {
 	        public void run() {
 	            listen();
@@ -101,7 +118,6 @@ public class MainActivity extends Activity {
 			  socket = serverSocket.accept();
 			  Log.d("myApp", "socket accepted");
 			  //dataInputStream = new DataInputStream(socket.getInputStream());
-			  //dataOutputStream = new DataOutputStream(socket.getOutputStream());
 			  in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			  
 			  while (!(inputLine = in.readLine()).equals(""))
@@ -123,9 +139,14 @@ public class MainActivity extends Activity {
 			     }
 		}
 	}
+	public void enableProxy(View view){
+		//TODO
+	}
+	public void disableProxy(View view){
+		//TODO
+	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
 	}
@@ -137,5 +158,27 @@ public class MainActivity extends Activity {
 	      }
 	      super.onDestroy();
 	    }
+	@Override
+	public void onDismissScreen(Ad arg0) {
+		
+	}
+	@Override
+	public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
+		counterFailedAds ++;
+	}
+	@Override
+	public void onLeaveApplication(Ad arg0) {
+		
+	}
+	@Override
+	public void onPresentScreen(Ad arg0) {
+		
+	}
+	@Override
+	public void onReceiveAd(Ad arg0) {
+		counterReceivedAds ++;
+		
+	}
+	
 
 }
