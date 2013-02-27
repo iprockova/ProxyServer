@@ -1,19 +1,28 @@
 package com.example.proxyserver;
 
-import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.CacheRequest;
+import java.net.CacheResponse;
 import java.net.HttpURLConnection;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.ResponseCache;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.List;
+import java.util.Map;
 
+import android.net.http.HttpResponseCache;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
-import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.app.Activity;
-import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -21,24 +30,6 @@ import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.ServerSocket;
-import java.net.Socket;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 
 import com.google.ads.*;
 import com.google.ads.AdRequest.ErrorCode;
@@ -51,12 +42,6 @@ public class MainActivity extends Activity implements AdListener{
 	private AdView adView;
 	private AdRequest adRequest;
 	
-	//ServerSocket
-	private ServerSocket serverSocket = null;
-	private Socket socket = null;
-	private DataInputStream dataInputStream = null;
-	private BufferedReader in = null;
-	
 	private LinearLayout layout;
 	
 	private TextView tvReceived = null;
@@ -65,12 +50,22 @@ public class MainActivity extends Activity implements AdListener{
 	private int counterReceivedAds = 0;
 	private int counterFailedAds = 0;
 	
-	public static final String HTTP_PROXY = "http_proxy";
+	private String url = "http://media.admob.com/sdk-core-v40.js";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		enableHttpCaching();
+		
+		
+		new Thread(new Runnable() {
+			public void run() {
+				getFileFromURL(url);
+				getFileFromURL(url);
+			}
+		}).start();
 		
 	}
 	public void fetchAds(View view){
@@ -104,47 +99,96 @@ public class MainActivity extends Activity implements AdListener{
 	public void startProxy(View view) {
 		new Thread(new Runnable() {
 	        public void run() {
-	            listen();
+	           new HttpServer().listen();
 	        }
 	    }).start();
 	}
-	public void listen(){
-		try {
-			   serverSocket = new ServerSocket(8888);
-			   Log.d("myApp", "Listening :8888");
-			   String inputLine;
-			  
-		  while(true){
-			  socket = serverSocket.accept();
-			  Log.d("myApp", "socket accepted");
-			  //dataInputStream = new DataInputStream(socket.getInputStream());
-			  in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			  
-			  while (!(inputLine = in.readLine()).equals(""))
-			      System.out.println(inputLine);
-			   }
-		}catch (IOException e) {
-			e.printStackTrace();
-		}
-		finally{
-			try {
-				if(socket!= null)
-			      socket.close();
-			    if (in!= null) 
-			    	in.close();
-			    if(dataInputStream!= null)
-			      dataInputStream.close();
-			}catch (IOException e) {
-			      e.printStackTrace();
-			     }
-		}
-	}
-	public void enableProxy(View view){
-		//TODO
-	}
-	public void disableProxy(View view){
-		//TODO
-	}
+	
+	private void enableHttpCaching()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+        {
+            try {
+              File httpCacheDir = new File(getApplicationContext().getCacheDir()
+                      , "http");
+              ResponseCache.setDefault(new ResponseCache() {
+
+				@Override
+				public CacheResponse get(URI uri, String s,
+						Map<String, List<String>> headers) throws IOException {
+					final File file = new File(getApplicationContext().getCacheDir(), escape(uri.getPath()));
+					 if (file.exists()) {
+				            return new CacheResponse() {
+				                @Override
+				                public Map<String, List<String>> getHeaders() throws IOException {
+				                    return null;
+				                }
+
+				                @Override
+				                public InputStream getBody() throws IOException {
+				                    return new FileInputStream(file);
+				                }
+				            };
+				        } else {
+				            return null;
+				        }
+				}
+
+				@Override
+				public CacheRequest put(URI uri, URLConnection connection)
+						throws IOException {
+					final File file = new File(getApplicationContext().getCacheDir(), escape(connection.getURL().getPath()));
+					 return new CacheRequest() {
+				            @Override
+				            public OutputStream getBody() throws IOException {
+				                return new FileOutputStream(file);
+				            }
+
+				            @Override
+				            public void abort() {
+				                file.delete();
+				            }
+				        };
+				}
+				 private String escape(String url) {
+				       return url.replace("/", "-").replace(".", "-");
+				    }
+            	  
+            	});
+              long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
+              HttpResponseCache.install(httpCacheDir, httpCacheSize);
+            } catch (IOException e) {
+              System.out.println("OVER ICS: HTTP response cache failed:" + e);
+            }        
+        } else {
+        	 try {
+                 File httpCacheDir = new File(getApplicationContext().getCacheDir(), "http");
+                 long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
+                 Class.forName("android.net.http.HttpResponseCache")
+                         .getMethod("install", File.class, long.class)
+                         .invoke(null, httpCacheDir, httpCacheSize);
+        	 }
+              catch (Exception httpResponseCacheNotAvailable) {
+            	  System.out.println("UNDER ICS : HTTP response cache  failed:" + httpResponseCacheNotAvailable);
+             }
+         }
+    }
+	
+	public static void getFileFromURL(String src) {
+	     try {
+	            URL url = new URL(src);
+	            HttpURLConnection connection=(HttpURLConnection)url.openConnection();
+	            connection.setUseCaches(true);
+	            connection.addRequestProperty("Cache-Control", "only-if-cached" );        
+	            InputStream input = connection.getInputStream();
+	            System.out.println("The resource was cached!");
+	        }catch (FileNotFoundException e) {
+	        	System.out.println("The resource was not cached!" + e);
+	        }catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_main, menu);
