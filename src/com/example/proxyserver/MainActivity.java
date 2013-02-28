@@ -64,6 +64,7 @@ public class MainActivity extends Activity implements AdListener{
 			public void run() {
 				getFileFromURL(url);
 				getFileFromURL(url);
+				getFileFromURL(url);
 			}
 		}).start();
 		
@@ -109,52 +110,11 @@ public class MainActivity extends Activity implements AdListener{
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
         {
             try {
-              File httpCacheDir = new File(getApplicationContext().getCacheDir()
-                      , "http");
-              ResponseCache.setDefault(new ResponseCache() {
-
-				@Override
-				public CacheResponse get(URI uri, String s,
-						Map<String, List<String>> headers) throws IOException {
-					final File file = new File(getApplicationContext().getCacheDir(), escape(uri.getPath()));
-					 if (file.exists()) {
-				            return new CacheResponse() {
-				                @Override
-				                public Map<String, List<String>> getHeaders() throws IOException {
-				                    return null;
-				                }
-
-				                @Override
-				                public InputStream getBody() throws IOException {
-				                    return new FileInputStream(file);
-				                }
-				            };
-				        } else {
-				            return null;
-				        }
-				}
-
-				@Override
-				public CacheRequest put(URI uri, URLConnection connection)
-						throws IOException {
-					final File file = new File(getApplicationContext().getCacheDir(), escape(connection.getURL().getPath()));
-					 return new CacheRequest() {
-				            @Override
-				            public OutputStream getBody() throws IOException {
-				                return new FileOutputStream(file);
-				            }
-
-				            @Override
-				            public void abort() {
-				                file.delete();
-				            }
-				        };
-				}
-				 private String escape(String url) {
-				       return url.replace("/", "-").replace(".", "-");
-				    }
-            	  
-            	});
+              File httpCacheDir = new File(getApplicationContext().getExternalCacheDir(), "http");
+              
+             // ResponseCache.setDefault(new MyResponseCache(getApplicationContext()));
+              ResponseCache.setDefault(new CCResponseCache());
+              
               long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
               HttpResponseCache.install(httpCacheDir, httpCacheSize);
             } catch (IOException e) {
@@ -162,7 +122,7 @@ public class MainActivity extends Activity implements AdListener{
             }        
         } else {
         	 try {
-                 File httpCacheDir = new File(getApplicationContext().getCacheDir(), "http");
+                 File httpCacheDir = new File(getApplicationContext().getExternalCacheDir(), "http");
                  long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
                  Class.forName("android.net.http.HttpResponseCache")
                          .getMethod("install", File.class, long.class)
@@ -175,15 +135,31 @@ public class MainActivity extends Activity implements AdListener{
     }
 	
 	public static void getFileFromURL(String src) {
+		 HttpURLConnection connection = null;
+		 InputStream input = null;
+		 URL url = null;
 	     try {
-	            URL url = new URL(src);
-	            HttpURLConnection connection=(HttpURLConnection)url.openConnection();
+	            url = new URL(src);
+	            connection=(HttpURLConnection)url.openConnection();
 	            connection.setUseCaches(true);
-	            connection.addRequestProperty("Cache-Control", "only-if-cached" );        
-	            InputStream input = connection.getInputStream();
+	           // connection.addRequestProperty("Cache-Control", "only-if-cached" );        
+	            input = connection.getInputStream();
 	            System.out.println("The resource was cached!");
 	        }catch (FileNotFoundException e) {
-	        	System.out.println("The resource was not cached!" + e);
+	        	System.out.println("The resource was not cached! Trying to download it... ");
+	        	//download it from server
+//	        	try {
+//		        	connection.disconnect();
+//		        	connection=(HttpURLConnection)url.openConnection();
+//		        	connection.setUseCaches(false);
+//		            connection.addRequestProperty("Cache-Control", "no-cache" );        
+//					input = connection.getInputStream();
+//					System.out.println("The resource was downloaded! ");
+//				} catch (IOException e1) {
+//					System.out.println("The resource was not downloaded! " + e1);
+//					e1.printStackTrace();
+//				}
+	        	
 	        }catch (IOException e) {
 	            e.printStackTrace();
 	        }
