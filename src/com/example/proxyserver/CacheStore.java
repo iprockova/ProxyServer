@@ -7,9 +7,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
  
@@ -22,7 +26,7 @@ public class CacheStore {
     private static CacheStore INSTANCE = null;
     private HashMap cacheMap;
     private HashMap bitmapMap;
-    private static final String cacheDir = "/Android/data/com.example.proxyserver/cache/";
+    private static final String cacheDir = "/sdcard/Android/data/com.example.proxyserver/cache/";
     private static final String CACHE_FILENAME = ".cache";
  
     private CacheStore() {
@@ -118,4 +122,33 @@ public class CacheStore {
         bitmapMap.put(cacheUri, bm);
         return bm;
     }
+    
+    public Bitmap downloadFile(String fileUrl){
+    	Bitmap bmImg;
+    	URL myFileUrl;
+    	
+		try {
+			 myFileUrl= new URL(fileUrl);
+			 
+	    	 HttpURLConnection conn= (HttpURLConnection)myFileUrl.openConnection();
+	    	 conn.setDoInput(true);
+	    	 conn.connect();
+	    	 
+	    	 InputStream is = conn.getInputStream();
+	    	 
+	    	 bmImg = BitmapFactory.decodeStream(is);
+	    	 
+	    	 return bmImg;
+		 }catch (MalformedURLException e) {
+	    	 // TODO Auto-generated catch block
+	    	 e.printStackTrace();
+	    	 return null;
+		 }catch (IOException e) {
+	    	 // TODO Auto-generated catch block
+	    	 e.printStackTrace();
+	    	 return null;
+		 }
+    }
+    
+
 }

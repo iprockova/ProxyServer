@@ -57,17 +57,26 @@ public class MainActivity extends Activity implements AdListener{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		enableHttpCaching();
-		
-		
+//		enableHttpCaching();
+//		
+//		
+//		new Thread(new Runnable() {
+//			public void run() {
+//				getFileFromURL(url);
+//				getFileFromURL(url);
+//				getFileFromURL(url);
+//			}
+//		}).start();
+
 		new Thread(new Runnable() {
 			public void run() {
-				getFileFromURL(url);
-				getFileFromURL(url);
-				getFileFromURL(url);
+				CacheStore instance = CacheStore.getInstance();
+				String fileURI = "http://www.googez.com/wp-content/uploads/2011/05/android_icon_256.png";
+		Bitmap image = instance.downloadFile(fileURI);
+		instance.saveCacheFile("http://www.googez.com/wp-content/uploads/2011/05/android_icon_256.png", image);
+		Bitmap image2 = instance.getCacheFile(fileURI);
 			}
-		}).start();
-		
+			}).start();
 	}
 	public void fetchAds(View view){
 		adView = new AdView(this, AdSize.BANNER, "a15122003cf3080");
@@ -112,7 +121,6 @@ public class MainActivity extends Activity implements AdListener{
             try {
               File httpCacheDir = new File(getApplicationContext().getExternalCacheDir(), "http");
               
-             // ResponseCache.setDefault(new MyResponseCache(getApplicationContext()));
               ResponseCache.setDefault(new CCResponseCache());
               
               long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
