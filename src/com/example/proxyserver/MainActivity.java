@@ -1,11 +1,14 @@
 package com.example.proxyserver;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.CacheRequest;
 import java.net.CacheResponse;
@@ -68,15 +71,22 @@ public class MainActivity extends Activity implements AdListener{
 //			}
 //		}).start();
 
+//		new Thread(new Runnable() {
+//			public void run() {
+//				CacheStore instance = CacheStore.getInstance();
+//				String fileURI = "http://www.googez.com/wp-content/uploads/2011/05/android_icon_256.png";
+//				Bitmap image = instance.downloadFile(fileURI);
+//				instance.saveCacheFile("http://www.googez.com/wp-content/uploads/2011/05/android_icon_256.png", image);
+//				Bitmap image2 = instance.getCacheFile(fileURI);
+//			}
+//			}).start();
 		new Thread(new Runnable() {
+			
+			@Override
 			public void run() {
-				CacheStore instance = CacheStore.getInstance();
-				String fileURI = "http://www.googez.com/wp-content/uploads/2011/05/android_icon_256.png";
-		Bitmap image = instance.downloadFile(fileURI);
-		instance.saveCacheFile("http://www.googez.com/wp-content/uploads/2011/05/android_icon_256.png", image);
-		Bitmap image2 = instance.getCacheFile(fileURI);
+				getFile();				
 			}
-			}).start();
+		});
 	}
 	public void fetchAds(View view){
 		adView = new AdView(this, AdSize.BANNER, "a15122003cf3080");
@@ -206,6 +216,25 @@ public class MainActivity extends Activity implements AdListener{
 	public void onReceiveAd(Ad arg0) {
 		counterReceivedAds ++;
 		
+	}
+	private void getFile(){
+	   String inputLine = "";
+	   URL url = null;
+	   HttpURLConnection urlConnection = null;
+	   
+	   try {
+		   url = new URL("http://www.android.com/");
+		   urlConnection = (HttpURLConnection) url.openConnection();
+		   BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+		   while (!(inputLine = in.readLine()).equals(""))
+			    System.out.println(inputLine);
+		   
+	   }
+	   catch(IOException e){
+		   e.printStackTrace();
+	   }finally {
+	     urlConnection.disconnect();
+	   }
 	}
 	
 
