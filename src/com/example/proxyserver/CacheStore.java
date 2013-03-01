@@ -25,13 +25,13 @@ import android.util.Log;
 public class CacheStore {
     private static CacheStore INSTANCE = null;
     private HashMap cacheMap;
-    private HashMap bitmapMap;
+    private HashMap responseMap;
     private static final String cacheDir = "/sdcard/Android/data/com.example.proxyserver/cache/";
     private static final String CACHE_FILENAME = ".cache";
  
     private CacheStore() {
         cacheMap = new HashMap();
-        bitmapMap = new HashMap();
+        responseMap = new HashMap();
         File fullCacheDir = new File(Environment.getExternalStorageDirectory().toString(),cacheDir);
         if(!fullCacheDir.exists()) {
             Log.i("CACHE", "Directory doesn't exist");
@@ -82,21 +82,21 @@ public class CacheStore {
         return INSTANCE;
     }
  
-    public void saveCacheFile(String cacheUri, Bitmap image) {
+    public void saveCacheFile(String cacheUri, MyHttpResponse response) {
         File fullCacheDir = new File(Environment.getExternalStorageDirectory().toString(),cacheDir);
-        String fileLocalName = new SimpleDateFormat("ddMMyyhhmmssSSS").format(new java.util.Date())+".PNG";
+        String fileLocalName = new SimpleDateFormat("ddMMyyhhmmssSSS").format(new java.util.Date());
         File fileUri = new File(fullCacheDir.toString(), fileLocalName);
         FileOutputStream outStream = null;
         try {
             outStream = new FileOutputStream(fileUri);
-            image.compress(Bitmap.CompressFormat.PNG, 100, outStream);
-            outStream.flush();
-            outStream.close();
+            ObjectOutputStream save = new ObjectOutputStream(outStream);
+            save.writeObject(response);
+            save.close();
+            
             cacheMap.put(cacheUri, fileLocalName);
             Log.i("CACHE", "Saved file "+cacheUri+" (which is now "+fileUri.toString()+") correctly");
-            bitmapMap.put(cacheUri, image);
-            ObjectOutputStream os = new ObjectOutputStream(new BufferedOutputStream(
-                    new FileOutputStream(new File(fullCacheDir.toString(), CACHE_FILENAME))));
+            responseMap.put(cacheUri, response);
+            ObjectOutputStream os = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(new File(fullCacheDir.toString(), CACHE_FILENAME))));
             os.writeObject(cacheMap);
             os.close();
         } catch (FileNotFoundException e) {
@@ -108,19 +108,9 @@ public class CacheStore {
         }
     }
  
-    public Bitmap getCacheFile(String cacheUri) {
-        if(bitmapMap.containsKey(cacheUri)) return (Bitmap)bitmapMap.get(cacheUri);
- 
-        if(!cacheMap.containsKey(cacheUri)) return null;
-        String fileLocalName = (String) cacheMap.get(cacheUri);
-        File fullCacheDir = new File(Environment.getExternalStorageDirectory().toString(),cacheDir);
-        File fileUri = new File(fullCacheDir.toString(), fileLocalName);
-        if(!fileUri.exists()) return null;
- 
-        Log.i("CACHE", "File "+cacheUri+" has been found in the Cache");
-        Bitmap bm = BitmapFactory.decodeFile(fileUri.toString());
-        bitmapMap.put(cacheUri, bm);
-        return bm;
+    public MyHttpResponse getCacheFile(String cacheUri) {
+        if(responseMap.containsKey(cacheUri)) return (MyHttpResponse)responseMap.get(cacheUri);
+        else return null;
     }
     
     public Bitmap downloadFile(String fileUrl){

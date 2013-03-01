@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.CacheRequest;
 import java.net.CacheResponse;
 import java.net.HttpURLConnection;
@@ -17,6 +18,7 @@ import java.net.ResponseCache;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -53,41 +55,25 @@ public class MainActivity extends Activity implements AdListener{
 	private int counterReceivedAds = 0;
 	private int counterFailedAds = 0;
 	
-	private String url = "http://media.admob.com/sdk-core-v40.js";
+	private static String cacheUrl = "http://media.admob.com/sdk-core-v40.js";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-//		enableHttpCaching();
-//		
-//		
-//		new Thread(new Runnable() {
-//			public void run() {
-//				getFileFromURL(url);
-//				getFileFromURL(url);
-//				getFileFromURL(url);
-//			}
-//		}).start();
-
-//		new Thread(new Runnable() {
-//			public void run() {
-//				CacheStore instance = CacheStore.getInstance();
-//				String fileURI = "http://www.googez.com/wp-content/uploads/2011/05/android_icon_256.png";
-//				Bitmap image = instance.downloadFile(fileURI);
-//				instance.saveCacheFile("http://www.googez.com/wp-content/uploads/2011/05/android_icon_256.png", image);
-//				Bitmap image2 = instance.getCacheFile(fileURI);
-//			}
-//			}).start();
 		new Thread(new Runnable() {
 			
-			@Override
 			public void run() {
-				getFile();				
+				//new HttpServerSocket().listen();
+				MyHttpResponse response = getFile(cacheUrl);		
+				saveToCache(cacheUrl, response);
+				MyHttpResponse cachedResponse = getFromCache(cacheUrl);
 			}
-		});
+		}).start();
 	}
+	
+	//AdMob: start ads
 	public void fetchAds(View view){
 		adView = new AdView(this, AdSize.BANNER, "a15122003cf3080");
 		
@@ -105,6 +91,7 @@ public class MainActivity extends Activity implements AdListener{
         adView.loadAd(adRequest);
         
 	}
+	//AdMob: stop ads
 	public void stopAds(View view){
 		if (adView != null) {
 			adView.removeAllViews();
@@ -116,73 +103,46 @@ public class MainActivity extends Activity implements AdListener{
         tvFailed = (TextView) findViewById(R.id.textView2);
         tvFailed.setText("Failed ads: " + counterFailedAds);
 	}
-	public void startProxy(View view) {
-		new Thread(new Runnable() {
-	        public void run() {
-	           new HttpServer().listen();
-	        }
-	    }).start();
+	
+	//CACHE Test: download file from URL and store the HTTP response to MyHttpResponse
+	private MyHttpResponse getFile(String cacheurl){
+	   URL url = null;
+	   HttpURLConnection urlConnection = null;
+	   
+	   try {
+		   url = new URL(cacheurl);
+		   urlConnection = (HttpURLConnection) url.openConnection();
+		   
+		   //get headers from response
+		   Map<String, List<String>> headersMap = urlConnection.getHeaderFields();
+		   String headersString = Util.convertMapToString(headersMap);
+		   
+		   //get content from response
+		   String contentString = Util.convertInputStreamToString(urlConnection.getInputStream());
+		   
+		   MyHttpResponse response = new MyHttpResponse();
+		   response.setBody(contentString);
+		   response.setHeaders(headersString);
+		   return response;
+	   }
+	   catch(IOException e){
+		   e.printStackTrace();
+		   return null;
+	   }finally {
+	     urlConnection.disconnect();
+	   }
+	}
+	//CACHE Test: cache the HTTP response
+	private void saveToCache(String cacheurl, MyHttpResponse response){
+		CacheStore cache = CacheStore.getInstance();
+		cache.saveCacheFile(cacheurl, response);
+	}
+	//CACHE Test: retrieve HTTP response from cache
+	private MyHttpResponse getFromCache(String cacheurl){
+		CacheStore cache = CacheStore.getInstance();
+		return cache.getCacheFile(cacheurl);
 	}
 	
-	private void enableHttpCaching()
-    {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-        {
-            try {
-              File httpCacheDir = new File(getApplicationContext().getExternalCacheDir(), "http");
-              
-              ResponseCache.setDefault(new CCResponseCache());
-              
-              long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
-              HttpResponseCache.install(httpCacheDir, httpCacheSize);
-            } catch (IOException e) {
-              System.out.println("OVER ICS: HTTP response cache failed:" + e);
-            }        
-        } else {
-        	 try {
-                 File httpCacheDir = new File(getApplicationContext().getExternalCacheDir(), "http");
-                 long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
-                 Class.forName("android.net.http.HttpResponseCache")
-                         .getMethod("install", File.class, long.class)
-                         .invoke(null, httpCacheDir, httpCacheSize);
-        	 }
-              catch (Exception httpResponseCacheNotAvailable) {
-            	  System.out.println("UNDER ICS : HTTP response cache  failed:" + httpResponseCacheNotAvailable);
-             }
-         }
-    }
-	
-	public static void getFileFromURL(String src) {
-		 HttpURLConnection connection = null;
-		 InputStream input = null;
-		 URL url = null;
-	     try {
-	            url = new URL(src);
-	            connection=(HttpURLConnection)url.openConnection();
-	            connection.setUseCaches(true);
-	           // connection.addRequestProperty("Cache-Control", "only-if-cached" );        
-	            input = connection.getInputStream();
-	            System.out.println("The resource was cached!");
-	        }catch (FileNotFoundException e) {
-	        	System.out.println("The resource was not cached! Trying to download it... ");
-	        	//download it from server
-//	        	try {
-//		        	connection.disconnect();
-//		        	connection=(HttpURLConnection)url.openConnection();
-//		        	connection.setUseCaches(false);
-//		            connection.addRequestProperty("Cache-Control", "no-cache" );        
-//					input = connection.getInputStream();
-//					System.out.println("The resource was downloaded! ");
-//				} catch (IOException e1) {
-//					System.out.println("The resource was not downloaded! " + e1);
-//					e1.printStackTrace();
-//				}
-	        	
-	        }catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	    }
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_main, menu);
@@ -217,25 +177,7 @@ public class MainActivity extends Activity implements AdListener{
 		counterReceivedAds ++;
 		
 	}
-	private void getFile(){
-	   String inputLine = "";
-	   URL url = null;
-	   HttpURLConnection urlConnection = null;
-	   
-	   try {
-		   url = new URL("http://www.android.com/");
-		   urlConnection = (HttpURLConnection) url.openConnection();
-		   BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-		   while (!(inputLine = in.readLine()).equals(""))
-			    System.out.println(inputLine);
-		   
-	   }
-	   catch(IOException e){
-		   e.printStackTrace();
-	   }finally {
-	     urlConnection.disconnect();
-	   }
-	}
-	
+	  
+	 
 
 }

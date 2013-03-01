@@ -9,11 +9,13 @@ import java.net.Socket;
 
 import android.util.Log;
 
-public class HttpServer {
+public class HttpServerSocket {
 	private ServerSocket serverSocket = null;
 	private Socket socket = null;
+	
 	private DataInputStream dataInputStream = null;
 	private BufferedReader in = null;
+	
 	public void listen(){
 		try {
 			   serverSocket = new ServerSocket(8888);
