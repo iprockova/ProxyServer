@@ -1,4 +1,4 @@
-package com.example.proxyserver;
+package com.example.cache;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
