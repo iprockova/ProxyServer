@@ -1,11 +1,14 @@
-package com.example.proxyserver;
+package com.example.networking;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import com.example.cache.CashTestRetreive;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -17,6 +20,7 @@ public class HttpServerSocket extends AsyncTask<Void, Void, Void>{
 	private Socket socket = null;
 	
 	private DataInputStream dataInputStream = null;
+	private DataOutputStream dataOutputStream = null;
 	private BufferedReader in = null;
 	
 	private volatile boolean running = true;
@@ -42,16 +46,29 @@ public class HttpServerSocket extends AsyncTask<Void, Void, Void>{
 			  socket = serverSocket.accept();
 			  Log.d("myApp", "socket accepted");
 			  //dataInputStream = new DataInputStream(socket.getInputStream());
+			  dataOutputStream = new DataOutputStream(socket.getOutputStream());
 			  in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
+			 
+			  StringBuffer request = new StringBuffer();
 			  while (!(inputLine = in.readLine()).equals("")) {
 			      System.out.println(inputLine);
-			      if(inputLine.contains(ADMOB_SERVER_1) || inputLine.contains(ADMOB_SERVER_2) || inputLine.contains(ADMOB_SERVER_3)){
-			    	  //contact cache
-			      }
+			      request.append(inputLine);
+			  }
+			  
+			  if (request.toString().contains("media.admob.com")){
+				  //MyHttpResponse response  = new CashTestRetreive().execute("http://media.admob.com/sdk-core-v40.js").get();
+				  System.out.println("Sending data back");
+				  dataOutputStream.writeUTF("HTTP/1.1 200 OK");
+				  dataOutputStream.writeUTF("Age:3073");
+				  dataOutputStream.writeUTF("Cache-Control:public, max-age=3600");
+				  dataOutputStream.writeUTF("Content-Type:text/javascript");
+				  System.out.println("Sending data back");
 			  }
 			   }
 		}catch (IOException e) {
+			e.printStackTrace();
+		}
+		catch(Exception e){
 			e.printStackTrace();
 		}
 		finally{
@@ -62,6 +79,8 @@ public class HttpServerSocket extends AsyncTask<Void, Void, Void>{
 			    	in.close();
 			    if(dataInputStream!= null)
 			      dataInputStream.close();
+			    if(dataOutputStream!= null)
+				      dataOutputStream.close();
 			}catch (IOException e) {
 			      e.printStackTrace();
 			     }

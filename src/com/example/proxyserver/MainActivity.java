@@ -16,6 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.cache.CacheStore;
+import com.example.networking.HttpClientSocket;
+import com.example.networking.HttpServerSocket;
 import com.google.ads.*;
 import com.google.ads.AdRequest.ErrorCode;
 
@@ -36,14 +38,17 @@ public class MainActivity extends Activity implements AdListener{
 	private int counterFailedAds = 0;
 	
 	private HttpServerSocket socket;
+	private HttpClientSocket socketClient;
+	private String url = "http://media.admob.com/sdk-core-v40.js";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		socket = new HttpServerSocket();
-		socket.execute();
+//		socket = new HttpServerSocket();
+//		socket.execute();
+		
 	}
 	
 	//AdMob: start ads
@@ -77,43 +82,11 @@ public class MainActivity extends Activity implements AdListener{
         tvFailed.setText("Failed ads: " + counterFailedAds);
 	}
 	
-	//CACHE Test: download file from URL and store the HTTP response to MyHttpResponse
-	private MyHttpResponse getFile(String cacheurl){
-	   URL url = null;
-	   HttpURLConnection urlConnection = null;
-	   
-	   try {
-		   url = new URL(cacheurl);
-		   urlConnection = (HttpURLConnection) url.openConnection();
-		   
-		   //get headers from response
-		   Map<String, List<String>> headersMap = urlConnection.getHeaderFields();
-		   String headersString = Util.convertMapToString(headersMap);
-		   
-		   //get content from response
-		   String contentString = Util.convertInputStreamToString(urlConnection.getInputStream());
-		   
-		   MyHttpResponse response = new MyHttpResponse();
-		   response.setBody(contentString);
-		   response.setHeaders(headersString);
-		   return response;
-	   }
-	   catch(IOException e){
-		   e.printStackTrace();
-		   return null;
-	   }finally {
-	     urlConnection.disconnect();
-	   }
-	}
-	//CACHE Test: cache the HTTP response
-	private void saveToCache(String cacheurl, MyHttpResponse response){
-		CacheStore cache = CacheStore.getInstance();
-		cache.saveCacheFile(cacheurl, response);
-	}
-	//CACHE Test: retrieve HTTP response from cache
-	private MyHttpResponse getFromCache(String cacheurl){
-		CacheStore cache = CacheStore.getInstance();
-		return cache.getCacheFile(cacheurl);
+	
+	public void startClient(View view){
+		System.out.println("new client socket");
+		socketClient = new HttpClientSocket();
+		socketClient.execute();
 	}
 	
 	@Override
@@ -129,6 +102,9 @@ public class MainActivity extends Activity implements AdListener{
 	      }
 	      if(socket !=null) {
 	    	  socket.cancel(true);
+	      }
+	      if(socketClient !=null) {
+	    	  socketClient.cancel(true);
 	      }
 	      super.onDestroy();
 	    }

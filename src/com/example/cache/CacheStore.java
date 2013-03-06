@@ -17,7 +17,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 
-import com.example.proxyserver.MyHttpResponse;
+import com.example.networking.MyHttpResponse;
  
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

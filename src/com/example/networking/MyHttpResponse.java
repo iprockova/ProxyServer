@@ -1,4 +1,4 @@
-package com.example.proxyserver;
+package com.example.networking;
 
 import java.io.Serializable;
 

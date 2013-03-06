@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import com.example.proxyserver.MyHttpResponse;
+import com.example.networking.MyHttpResponse;
 
 public class Cache {
 	private LinkedList<HashMap<String, MyHttpResponse>> list;
