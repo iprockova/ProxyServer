@@ -57,24 +57,15 @@ public class MainActivity extends Activity implements AdListener{
 	private int counterReceivedAds = 0;
 	private int counterFailedAds = 0;
 	
-	private static String cacheUrl = "http://media.admob.com/sdk-core-v40.js";
+	private HttpServerSocket socket;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		new Thread(new Runnable() {
-			
-			public void run() {
-				
-				new HttpServerSocket().listen();
-				
-//				MyHttpResponse response = getFile(cacheUrl);		
-//				saveToCache(cacheUrl, response);
-//				MyHttpResponse cachedResponse = getFromCache(cacheUrl);
-			}
-		}).start();
+		socket = new HttpServerSocket();
+		socket.execute();
 	}
 	
 	//AdMob: start ads
@@ -119,14 +110,14 @@ public class MainActivity extends Activity implements AdListener{
 		   
 		   //get headers from response
 		   Map<String, List<String>> headersMap = urlConnection.getHeaderFields();
-		   String headersString = Util.convertMapToString(headersMap);
+		   //String headersString = Util.convertMapToString(headersMap);
 		   
 		   //get content from response
-		   String contentString = Util.convertInputStreamToString(urlConnection.getInputStream());
+		   //String contentString = Util.convertInputStreamToString(urlConnection.getInputStream());
 		   
 		   MyHttpResponse response = new MyHttpResponse();
-		   response.setBody(contentString);
-		   response.setHeaders(headersString);
+		   //response.setBody(contentString);
+		   //response.setHeaders(headersString);
 		   return response;
 	   }
 	   catch(IOException e){
@@ -157,6 +148,9 @@ public class MainActivity extends Activity implements AdListener{
 	    public void onDestroy() {
 	      if (adView != null) {
 	        adView.destroy();
+	      }
+	      if(socket !=null) {
+	    	  socket.cancel(true);
 	      }
 	      super.onDestroy();
 	    }
