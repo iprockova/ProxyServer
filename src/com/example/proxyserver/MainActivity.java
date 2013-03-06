@@ -15,6 +15,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.cache.CacheStore;
 import com.google.ads.*;
 import com.google.ads.AdRequest.ErrorCode;
 
