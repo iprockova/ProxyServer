@@ -16,6 +16,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+
+import com.example.proxyserver.MyHttpResponse;
  
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -24,14 +26,14 @@ import android.util.Log;
  
 public class CacheStore {
     private static CacheStore INSTANCE = null;
-    private HashMap cacheMap;
-    private HashMap responseMap;
+    private HashMap<String, String> cacheMap;
+    private HashMap<String, MyHttpResponse> responseMap;
     private static final String cacheDir = "/sdcard/Android/data/com.example.proxyserver/cache/";
     private static final String CACHE_FILENAME = ".cache";
  
     private CacheStore() {
-        cacheMap = new HashMap();
-        responseMap = new HashMap();
+        cacheMap = new HashMap<String, String>();
+        responseMap = new HashMap<String, MyHttpResponse>();
         File fullCacheDir = new File(Environment.getExternalStorageDirectory().toString(),cacheDir);
         if(!fullCacheDir.exists()) {
             Log.i("CACHE", "Directory doesn't exist");
@@ -40,7 +42,7 @@ public class CacheStore {
         }
         try {
             ObjectInputStream is = new ObjectInputStream(new BufferedInputStream(new FileInputStream(new File(fullCacheDir.toString(), CACHE_FILENAME))));
-            cacheMap = (HashMap)is.readObject();
+            cacheMap = (HashMap<String,String>)is.readObject();
             is.close();
         } catch (StreamCorruptedException e) {
             Log.i("CACHE", "Corrupted stream");
@@ -58,7 +60,7 @@ public class CacheStore {
     }
  
     private void cleanCacheStart() {
-        cacheMap = new HashMap();
+        cacheMap = new HashMap<String, String>();
         File fullCacheDir = new File(Environment.getExternalStorageDirectory().toString(),cacheDir);
         fullCacheDir.mkdirs();
         File noMedia = new File(fullCacheDir.toString(), ".nomedia");
