@@ -88,14 +88,14 @@ public class MainActivity extends Activity implements AdListener{
 		   
 		   //get headers from response
 		   Map<String, List<String>> headersMap = urlConnection.getHeaderFields();
-		   //String headersString = Util.convertMapToString(headersMap);
+		   String headersString = Util.convertMapToString(headersMap);
 		   
 		   //get content from response
-		   //String contentString = Util.convertInputStreamToString(urlConnection.getInputStream());
+		   String contentString = Util.convertInputStreamToString(urlConnection.getInputStream());
 		   
 		   MyHttpResponse response = new MyHttpResponse();
-		   //response.setBody(contentString);
-		   //response.setHeaders(headersString);
+		   response.setBody(contentString);
+		   response.setHeaders(headersString);
 		   return response;
 	   }
 	   catch(IOException e){
