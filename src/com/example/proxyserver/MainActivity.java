@@ -14,6 +14,7 @@ import java.io.StringWriter;
 import java.net.CacheRequest;
 import java.net.CacheResponse;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.ResponseCache;
 import java.net.URI;
 import java.net.URL;
@@ -25,6 +26,7 @@ import java.util.Map;
 import android.net.http.HttpResponseCache;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -65,10 +67,12 @@ public class MainActivity extends Activity implements AdListener{
 		new Thread(new Runnable() {
 			
 			public void run() {
-				//new HttpServerSocket().listen();
-				MyHttpResponse response = getFile(cacheUrl);		
-				saveToCache(cacheUrl, response);
-				MyHttpResponse cachedResponse = getFromCache(cacheUrl);
+				
+				new HttpServerSocket().listen();
+				
+//				MyHttpResponse response = getFile(cacheUrl);		
+//				saveToCache(cacheUrl, response);
+//				MyHttpResponse cachedResponse = getFromCache(cacheUrl);
 			}
 		}).start();
 	}

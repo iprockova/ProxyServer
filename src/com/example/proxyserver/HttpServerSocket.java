@@ -19,7 +19,7 @@ public class HttpServerSocket {
 	public void listen(){
 		try {
 			   serverSocket = new ServerSocket(8888);
-			   Log.d("myApp", "Listening :8888");
+			   Log.d("myApp", "Listening :8080");
 			   String inputLine;
 
 		  while(true){
