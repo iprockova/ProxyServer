@@ -1,36 +1,13 @@
 package com.example.proxyserver;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.net.CacheRequest;
-import java.net.CacheResponse;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ResponseCache;
-import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import android.net.http.HttpResponseCache;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
