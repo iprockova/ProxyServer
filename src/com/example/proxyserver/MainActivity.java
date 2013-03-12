@@ -1,11 +1,5 @@
 package com.example.proxyserver;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Gravity;
@@ -46,8 +40,8 @@ public class MainActivity extends Activity implements AdListener{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-//		socket = new HttpServerSocket();
-//		socket.execute();
+		socket = new HttpServerSocket();
+		socket.execute();
 		
 	}
 	
@@ -85,8 +79,8 @@ public class MainActivity extends Activity implements AdListener{
 	
 	public void startClient(View view){
 		System.out.println("new client socket");
-		socketClient = new HttpClientSocket();
-		socketClient.execute();
+//		socketClient = new HttpClientSocket();
+//		socketClient.execute();
 	}
 	
 	@Override
@@ -104,7 +98,7 @@ public class MainActivity extends Activity implements AdListener{
 	    	  socket.cancel(true);
 	      }
 	      if(socketClient !=null) {
-	    	  socketClient.cancel(true);
+	    	  //socketClient.cancel(true);
 	      }
 	      super.onDestroy();
 	    }

@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -15,79 +16,76 @@ import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
-import android.os.AsyncTask;
+import org.apache.commons.io.IOUtils;
 
-public class HttpClientSocket extends AsyncTask<Void, Void, Void>{
+import android.os.AsyncTask;
+import android.util.Log;
+
+public class HttpClientSocket{
 	 Socket socket = null;
 	 DataOutputStream dataOutputStream = null;
 	 DataInputStream dataInputStream = null;
-	 private volatile boolean running = true;
 	 
-	 @Override
-		protected void onCancelled() {
-		        running = false;
-		}
-
-	@Override
-	protected Void doInBackground(Void... params) {
-		String testServerName = "130.233.194.86";
-	    int port = 8080;
+	public String execute(String input) {
 	    try
 	    {
 	      // open a socket
-	      Socket socket = openSocket(testServerName, port);
+	      Socket socket = openSocket("192.168.0.15", 8080);
 	      
-	      // write-to, and read-from the socket.
-	      // in this case just write a simple command to a web server.
-	      String result = writeToAndReadFromSocket(socket, "GET /\n\n");
+	      // write-to the socket.
+	      writeToSocket(socket, input);
 	      
-	      // print out the result we got back from the server
-	      System.out.println(result);
-
+	      String reply = readFromSocket(socket);
+	      
 	      // close the socket, and we're done
 	      socket.close();
+	      
+	      return reply;
 	    }
 	    catch (Exception e)
 	    {
 	      e.printStackTrace();
+	      return null;
 	    }
-		return null;
 	}
 	  
-	  private String writeToAndReadFromSocket(Socket socket, String writeTo) throws Exception
+	  private void writeToSocket(Socket socket, String input) throws Exception
 	  {
 	    try 
 	    {
-	      // write text to the socket
-	      BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-	      bufferedWriter.write(writeTo);
-	      bufferedWriter.flush();
-	      
-	      // read text from the socket
-	      BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-	      StringBuilder sb = new StringBuilder();
-	      String str;
-	      while ((str = bufferedReader.readLine()) != null)
-	      {
-	        sb.append(str + "\n");
-	      }
-	      
-	      // close the reader, and return the results as a String
-	      bufferedReader.close();
-	      return sb.toString();
-	    } 
-	    catch (IOException e) 
-	    {
+	    	//write to socket 
+	    	OutputStream out = socket.getOutputStream();
+	    	out.write(input.getBytes("US-ASCII"));
+	        out.flush();
+	    } catch (IOException e) {
 	      e.printStackTrace();
-	      throw e;
 	    }
 	  }
+	private String readFromSocket(Socket socket){
+		
+		try{
+		//read from socket
+		String res=null; 
+    	String inputLine;
+    	StringBuffer response = new StringBuffer();
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+	    while ((inputLine = in.readLine()) != null) {
+		  System.out.println(inputLine);
+		  response.append(inputLine + "\r\n");
+	    }
+	    response.append("\r\n");
+	    
+	    in.close();
+	    
+	    res = response.toString();
+	    return res;
+		}catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	  
-	  /**
-	   * Open a socket connection to the given server on the given port.
-	   * This method currently sets the socket timeout value to 10 seconds.
-	   * (A second version of this method could allow the user to specify this timeout.)
-	   */
+	  
 	  private Socket openSocket(String server, int port) throws Exception
 	  {
 	    Socket socket;
@@ -114,4 +112,5 @@ public class HttpClientSocket extends AsyncTask<Void, Void, Void>{
 	      throw ste;
 	    }
 	  }
+	  
 }

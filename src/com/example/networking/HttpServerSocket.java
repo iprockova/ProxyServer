@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -39,32 +41,23 @@ public class HttpServerSocket extends AsyncTask<Void, Void, Void>{
 	protected Void doInBackground(Void... params) {
 		try {
 			   serverSocket = new ServerSocket(8888);
-			   Log.d("myApp", "Listening :8888");
-			   String inputLine;
+			   Log.d("myApp", "server socket listening :8888");
 
-		  while(running){
 			  socket = serverSocket.accept();
-			  Log.d("myApp", "socket accepted");
-			  //dataInputStream = new DataInputStream(socket.getInputStream());
-			  dataOutputStream = new DataOutputStream(socket.getOutputStream());
-			  in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			 
-			  StringBuffer request = new StringBuffer();
-			  while (!(inputLine = in.readLine()).equals("")) {
-			      System.out.println(inputLine);
-			      request.append(inputLine);
-			  }
 			  
-			  if (request.toString().contains("media.admob.com")){
-				  //MyHttpResponse response  = new CashTestRetreive().execute("http://media.admob.com/sdk-core-v40.js").get();
-				  System.out.println("Sending data back");
-				  dataOutputStream.writeUTF("HTTP/1.1 200 OK");
-				  dataOutputStream.writeUTF("Age:3073");
-				  dataOutputStream.writeUTF("Cache-Control:public, max-age=3600");
-				  dataOutputStream.writeUTF("Content-Type:text/javascript");
-				  System.out.println("Sending data back");
-			  }
-			   }
+			  //read the request from the socket
+			  String request = readFromSocket(socket);
+			  
+			  //initiate client socket and wait for result
+			  String reply = new HttpClientSocket().execute(request);
+			  
+			  //write the result back to the socket
+			   writeToSocket(socket, reply);
+			   System.out.println("HttpServerSocket: reply sent to AdMob");
+		
+		  //close the socket	   
+		  socket.close();
+		  
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -74,17 +67,44 @@ public class HttpServerSocket extends AsyncTask<Void, Void, Void>{
 		finally{
 			try {
 				if(socket!= null)
-			      socket.close();
-			    if (in!= null) 
-			    	in.close();
-			    if(dataInputStream!= null)
-			      dataInputStream.close();
-			    if(dataOutputStream!= null)
-				      dataOutputStream.close();
+			       socket.close();
 			}catch (IOException e) {
 			      e.printStackTrace();
-			     }
+			}
 		}
 		return null;
+	}
+	private String readFromSocket(Socket socket) {
+		  try{
+			  
+			  String inputLine = "";
+			  InputStream input = socket.getInputStream();
+			  in = new BufferedReader(new InputStreamReader(input));
+			  
+			  StringBuffer request = new StringBuffer();
+			  //print the input
+			  while (!(inputLine = in.readLine()).equals("")) {
+			      System.out.println(inputLine);
+			      if(!(inputLine.contains("Accept-Encoding")))
+			    	  request.append(inputLine + "\r\n");
+			  }
+			  request.append("\r\n");
+			  
+			  return request.toString();
+		  }catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+	private void writeToSocket(Socket socket, String response) {
+		try{
+			OutputStream out = socket.getOutputStream();
+	    	out.write(response.getBytes());
+	        out.flush();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 }
