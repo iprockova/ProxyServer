@@ -49,7 +49,7 @@ public class HttpServerSocket extends AsyncTask<Void, Void, Void>{
 			  String request = readFromSocket(socket);
 			  
 			  //initiate client socket and wait for result
-			  String reply = new HttpClientSocket().execute(request);
+			  byte[] reply = new HttpClientSocket().execute(request);
 			  
 			  //write the result back to the socket
 			   writeToSocket(socket, reply);
@@ -85,8 +85,7 @@ public class HttpServerSocket extends AsyncTask<Void, Void, Void>{
 			  //print the input
 			  while (!(inputLine = in.readLine()).equals("")) {
 			      System.out.println(inputLine);
-			      if(!(inputLine.contains("Accept-Encoding")))
-			    	  request.append(inputLine + "\r\n");
+			      request.append(inputLine + "\r\n");
 			  }
 			  request.append("\r\n");
 			  
@@ -97,10 +96,10 @@ public class HttpServerSocket extends AsyncTask<Void, Void, Void>{
 		}
 		
 	}
-	private void writeToSocket(Socket socket, String response) {
+	private void writeToSocket(Socket socket, byte[] response) {
 		try{
 			OutputStream out = socket.getOutputStream();
-	    	out.write(response.getBytes());
+	    	out.write(response);
 	        out.flush();
 		}catch (Exception e) {
 			e.printStackTrace();
