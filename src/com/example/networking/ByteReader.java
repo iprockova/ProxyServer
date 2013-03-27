@@ -8,7 +8,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HttpClientRead {
+public class ByteReader {
 
 	public static byte[] readResponse(InputStream in){
 		int index = 0;
@@ -37,6 +37,9 @@ public class HttpClientRead {
         }catch (IOException e) {System.err.println(e);} 
         catch (Exception e) {System.err.println(e);} 
         
+     // String arrayString = listToString(array);
+     // System.out.println(arrayString);
+     //   printByteArray(array);
         System.out.println("Done: " + array.size());
         
         byte [] response = listToByteArray(array);
