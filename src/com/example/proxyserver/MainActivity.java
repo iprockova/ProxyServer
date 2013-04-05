@@ -9,16 +9,12 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.cache.CacheStore;
-import com.example.networking.HttpClientSocket;
 import com.example.networking.HttpServerSocket;
 import com.google.ads.*;
 import com.google.ads.AdRequest.ErrorCode;
 
 
 public class MainActivity extends Activity implements AdListener{
-
-	
 	// AdMob 
 	private AdView adView;
 	private AdRequest adRequest;
@@ -32,8 +28,6 @@ public class MainActivity extends Activity implements AdListener{
 	private int counterFailedAds = 0;
 	
 	private HttpServerSocket socket;
-	private HttpClientSocket socketClient;
-	private String url = "http://media.admob.com/sdk-core-v40.js";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -77,12 +71,6 @@ public class MainActivity extends Activity implements AdListener{
 	}
 	
 	
-	public void startClient(View view){
-		System.out.println("new client socket");
-//		socketClient = new HttpClientSocket();
-//		socketClient.execute();
-	}
-	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.activity_main, menu);
@@ -96,9 +84,6 @@ public class MainActivity extends Activity implements AdListener{
 	      }
 	      if(socket !=null) {
 	    	  socket.cancel(true);
-	      }
-	      if(socketClient !=null) {
-	    	  //socketClient.cancel(true);
 	      }
 	      super.onDestroy();
 	    }

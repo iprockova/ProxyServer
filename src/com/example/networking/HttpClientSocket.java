@@ -20,7 +20,8 @@ public class HttpClientSocket{
 	 
 	public byte[] execute(String input) {
 		Socket socket = null;
-		String testServerName = "192.168.0.11";
+		//String testServerName = "192.168.0.11";
+		String testServerName = "86.50.137.172";
 	    int port = 8080;
 	    try
 	    {
@@ -83,7 +84,7 @@ public class HttpClientSocket{
 	      socket = new Socket();
 	  
 	      // this method will block no more than timeout ms.
-	      int timeoutInMs = 10*1000;   // 10 seconds
+	      int timeoutInMs = 15*1000;   // 10 seconds
 	      socket.connect(socketAddress, timeoutInMs);
 	      
 	      return socket;

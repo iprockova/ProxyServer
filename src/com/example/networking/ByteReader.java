@@ -40,7 +40,7 @@ public class ByteReader {
      // String arrayString = listToString(array);
      // System.out.println(arrayString);
      //   printByteArray(array);
-        System.out.println("Done: " + array.size());
+        //System.out.println("Done: " + array.size());
         
         byte [] response = listToByteArray(array);
         return response;

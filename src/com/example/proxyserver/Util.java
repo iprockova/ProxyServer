@@ -52,4 +52,26 @@ public class Util {
 	        return strText;
 	    }
 	 
+	 /*
+	  *  Retreive ad number from the request. Only 1,2,3,4,5 are allowed as adNumbers. 
+	  *  If the number is bigger than 5 its module of 5 is returned(adNum%5).
+	  */
+	 public static int getAdCacheIndex(String request) {
+		    String adNumber = request.substring(request.indexOf('=') + 1, request.indexOf('&'));
+		    int adNum = Integer.parseInt(adNumber);
+		    int num=0;
+		    if(adNum > 5 && adNum%5!=0 ) 
+		    	num = adNum % 5;
+		    else {
+		    	if(adNum > 5  && adNum%5 ==0)
+					num = 5;
+				else num = adNum;
+		    }
+			return num;
+		}
+	 public static int getAdNumber(String request){
+		 String adNumber = request.substring(request.indexOf('=') + 1, request.indexOf('&'));
+		 return Integer.parseInt(adNumber);
+	 }
+	 
 }
