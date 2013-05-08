@@ -33,10 +33,6 @@ public class MainActivity extends Activity implements AdListener{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		socket = new HttpServerSocket();
-		socket.execute();
-		
 	}
 	
 	//AdMob: start ads
@@ -68,6 +64,10 @@ public class MainActivity extends Activity implements AdListener{
         
         tvFailed = (TextView) findViewById(R.id.textView2);
         tvFailed.setText("Failed ads: " + counterFailedAds);
+	}
+	public void startServer(View view){
+		socket = new HttpServerSocket();
+		socket.execute();
 	}
 	
 	
@@ -105,6 +105,7 @@ public class MainActivity extends Activity implements AdListener{
 	}
 	@Override
 	public void onReceiveAd(Ad arg0) {
+		//System.out.println("Received ad: " + arg0.toString() + ", ad number: " + counterReceivedAds);
 		counterReceivedAds ++;
 		
 	}

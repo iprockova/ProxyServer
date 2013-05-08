@@ -21,7 +21,7 @@ public class HttpClientSocket{
 	public byte[] execute(String input) {
 		Socket socket = null;
 		//String testServerName = "192.168.0.11";
-		String testServerName = "86.50.137.172";
+		String testServerName = "86.50.145.156";
 	    int port = 8080;
 	    try
 	    {
